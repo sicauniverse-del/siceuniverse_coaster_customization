@@ -140,6 +140,21 @@
             </p>
         </section>
 
+        <!-- 範例參考圖區塊 -->
+        <section class="w-full max-w-[980px] bg-white border border-stone-100 p-6 rounded-2xl shadow-sm flex flex-col items-center gap-4">
+             <h3 class="text-xs font-semibold text-stone-400 uppercase tracking-wider self-start">參考案例</h3>
+    
+            <div class="w-full max-w-sm">
+             <!-- 若圖片路徑正確，simple.png 會自動顯示；若讀取失敗則會顯示 placeholder -->
+            <img src="simple.png" alt="參考案例圖" 
+                class="w-full h-auto rounded-xl border border-stone-200 shadow-sm" 
+                onerror="this.onerror=null; this.src='https://placehold.co/400x400/f5f5f4/a8a29e?text=Simple+Image';">
+    </div>
+
+    <p class="text-xs text-stone-500 font-medium bg-stone-100 px-4 py-1.5 rounded-full flex items-center gap-1.5">
+        <i class="fa-solid fa-lightbulb text-amber-500"></i> 範例圖，僅供參考
+    </p>
+</section>
     </main>
 
     <!-- 頁腳 -->
