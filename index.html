@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SICA UNIVERSE 西卡宇宙 - 塗色工作坊</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        /* 格子細線格線樣式 */
+        .grid-cell {
+            transition: background-color 0.15s ease, border-color 0.15s ease;
+            aspect-ratio: 1 / 1;
+        }
+    </style>
+</head>
+<body class="bg-stone-50 text-stone-800 min-h-screen flex flex-col justify-between selection:bg-amber-100">
+
+    <!-- 頂部導覽列 -->
+    <header class="bg-white border-b border-stone-100 py-4 px-6 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-center items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-amber-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-200">
+                    <i class="fa-solid fa-space-shuttle transform -rotate-45 text-lg"></i>
+                </div>
+                <div class="text-center">
+                    <h1 class="text-xl font-bold tracking-wider text-stone-900">SICA UNIVERSE</h1>
+                    <p class="text-xs text-amber-600 font-medium tracking-widest">西卡宇宙塗色工作坊</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要操作區 -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 flex flex-col gap-8 items-center justify-center">
+        
+        <!-- 上方區塊：工具欄與色板 -->
+        <div class="w-full flex flex-col lg:flex-row gap-8 items-stretch justify-center">
+            
+            <!-- 左側側邊欄：工具與色彩選擇 -->
+            <aside class="w-full lg:w-80 flex flex-col gap-6 shrink-0">
+                <!-- 工具卡片 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex flex-col gap-4">
+                    <h3 class="text-sm font-semibold text-stone-400 uppercase tracking-wider">工具模式</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="tool-pencil" class="flex flex-col items-center justify-center p-3 rounded-xl border border-amber-600 bg-amber-50 text-amber-700 transition-all active:scale-95 group">
+                            <i class="fa-solid fa-paintbrush text-lg mb-1 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-medium">畫筆</span>
+                        </button>
+                        <button id="tool-eraser" class="flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-all active:scale-95 group">
+                            <i class="fa-solid fa-eraser text-lg mb-1 group-hover:scale-110 transition-transform"></i>
+                            <span class="text-xs font-medium">橡皮擦</span>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 pt-3 border-t border-stone-100">
+                        <button id="btn-undo" disabled class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-all active:scale-95 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none">
+                            <i class="fa-solid fa-rotate-left"></i> 上一步
+                        </button>
+                        <button id="btn-redo" disabled class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl border border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-all active:scale-95 text-xs font-semibold disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none">
+                            <i class="fa-solid fa-rotate-right"></i> 下一步
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 色彩選取卡片 -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex flex-col gap-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-semibold text-stone-400 uppercase tracking-wider">色彩選擇</h3>
+                    </div>
+                    
+                    <!-- 預設顏色網格 -->
+                    <div>
+                        <p class="text-xs text-stone-400 mb-2">宇宙專屬色系</p>
+                        <div class="grid grid-cols-4 gap-2.5" id="preset-colors-container">
+                            <!-- 由 JS 自動填充 -->
+                        </div>
+                    </div>
+
+                    <!-- 當前選擇顏色預覽 -->
+                    <div class="pt-3 border-t border-stone-100 flex items-center justify-between">
+                        <span class="text-xs text-stone-500 font-medium">當前選取色：</span>
+                        <div id="color-preview" class="w-6 h-6 rounded-full border border-stone-200 shadow-sm" style="background-color: #8c2433;"></div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 中間畫布區 -->
+            <section class="flex-grow flex flex-col justify-center items-center">
+                <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-md border border-stone-100 flex flex-col items-center gap-6 w-full max-w-[640px] relative">
+                    <!-- 畫布資訊標籤 -->
+                    <div class="flex justify-between w-full items-center">
+                        <div class="flex items-center gap-2 text-stone-500 text-xs font-semibold">
+                            <i class="fa-solid fa-border-all"></i>
+                            <span>規格：9 × 8 格點畫板</span>
+                        </div>
+                        <span class="text-xs bg-amber-50 text-amber-800 px-2.5 py-1 rounded-md font-medium">
+                            按住並拖曳可連續上色
+                        </span>
+                    </div>
+
+                    <!-- 塗色畫板容器 -->
+                    <div class="w-full bg-stone-100 p-2 rounded-xl shadow-inner border border-stone-200 select-none touch-none">
+                        <div id="color-board" class="grid grid-cols-9 gap-[1.5px] bg-stone-200 overflow-hidden rounded-lg">
+                            <!-- 格子將由 JavaScript 動態生成 -->
+                        </div>
+                    </div>
+
+                    <!-- 底部提示 -->
+                    <p class="text-xs text-stone-400 text-center">
+                        提示：先從左側選擇顏色與模式，接著直接在方格中點擊或滑動塗色。
+                    </p>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- 下方全域操作欄 -->
+        <div class="w-full max-w-[980px] bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex flex-col sm:flex-row gap-4">
+            <button id="btn-clear" class="flex-1 py-3.5 px-4 border border-rose-200 text-rose-600 hover:bg-rose-50 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-98">
+                <i class="fa-solid fa-trash-can"></i> 一鍵清空畫布
+            </button>
+            <button id="btn-export" class="flex-[1.5] py-4 px-4 bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-100 hover:shadow-amber-200 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 active:scale-98">
+                <i class="fa-solid fa-file-arrow-down text-base"></i> 匯出創作圖檔 (含浮水印)
+            </button>
+        </div>
+
+        <!-- 創作者社群合作推廣公告 -->
+        <section class="w-full max-w-[980px] bg-amber-50/50 border border-amber-100/60 p-5 rounded-2xl text-center flex flex-col items-center gap-2 shadow-sm">
+            <div class="flex items-center gap-2 text-amber-800 font-semibold text-xs sm:text-sm">
+                <i class="fa-solid fa-heart text-orange-500 animate-pulse"></i>
+                <span>致熱愛手作的編織創作者們</span>
+            </div>
+            <p class="text-[11px] sm:text-xs text-stone-600 leading-relaxed max-w-2xl">
+                歡迎各位熱愛編織的手作老闆與工作室夥伴，將本網站作為與客戶討論客製配色的溝通工具！我們非常高興能對大家的創作有所幫助。如果覺得好用，在對外分享或引導客群使用時，請記得貼心標明網站出自「<strong class="text-amber-950 font-bold">西卡宇宙 SICA UNIVERSE</strong>」唷！讓我們一起把編織的美好散播出去 ✨
+            </p>
+        </section>
+
+    </main>
+
+    <!-- 頁腳 -->
+    <footer class="bg-white border-t border-stone-100 py-6 text-center text-stone-400 text-xs">
+        <p>© 2026 SICA UNIVERSE 西卡宇宙. All Rights Reserved.</p>
+    </footer>
+
+    <!-- 懸浮對話框公告欄 (展開狀態) -->
+    <div id="floating-announcement" class="fixed bottom-6 right-6 z-[100] max-w-[280px] sm:max-w-xs bg-stone-50/80 backdrop-blur-md text-stone-800 p-4 rounded-2xl rounded-br-none shadow-xl border border-amber-200 flex gap-3 items-start transition-all duration-300">
+        <div class="text-amber-600 mt-0.5 shrink-0">
+            <i class="fa-solid fa-circle-info text-lg animate-pulse"></i>
+        </div>
+        <div class="flex-grow text-xs leading-relaxed">
+            <p class="font-bold text-stone-900 mb-1 tracking-wide">SICA UNIVERSE</p>
+            此網站是西卡宇宙SICA UNIVERSE的客製杯墊網站，<br>基礎價格為：<strong class="text-amber-800 underline underline-offset-2 decoration-amber-400 font-bold">NT$600/個 兩色</strong>，每多加一個顏色 <strong class="text-amber-800 font-bold">+NTD$50</strong>
+        </div>
+        <button onclick="toggleAnnouncement()" class="text-stone-400 hover:text-stone-800 shrink-0 -mt-1 -mr-1 p-1 hover:bg-stone-200/50 rounded-lg transition-colors" title="收合公告">
+            <i class="fa-solid fa-minus text-sm"></i>
+        </button>
+    </div>
+
+    <!-- 懸浮對話框公告欄 (縮小狀態) -->
+    <button id="floating-announcement-minimized" onclick="toggleAnnouncement()" class="hidden fixed bottom-6 right-6 z-[100] w-12 h-12 bg-stone-50/80 backdrop-blur-md text-amber-600 rounded-full shadow-xl border border-amber-200 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group" title="展開公告">
+        <i class="fa-solid fa-circle-info text-lg animate-pulse"></i>
+    </button>
+    </div>
+
+    <!-- 懸浮對話框公告欄 (縮小狀態) -->
+    <button id="floating-announcement-minimized" onclick="toggleAnnouncement()" class="hidden fixed bottom-6 right-6 z-[100] w-12 h-12 bg-stone-900/90 backdrop-blur-md text-stone-100 rounded-full shadow-2xl border border-amber-700/30 flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 group" title="展開公告">
+        <i class="fa-solid fa-circle-info text-lg text-amber-400 group-hover:text-white animate-pulse"></i>
+    </button>
+
+    <script>
+        // 指定的 11 款宇宙美學色系
+        const presets = [
+            '#8c2433', '#e6833d', '#e9cb3d', '#a6b134', '#4b6857', 
+            '#99c4d5', '#204482', '#e2906e', '#bf7784', '#725136', 
+            '#e1d4c0'
+        ];
+
+        // 畫布規格（9寬，8高）
+        const COLS = 9;
+        const ROWS = 8;
+        
+        // 系統狀態
+        let currentColor = '#8c2433';
+        let currentTool = 'pencil'; // 'pencil', 'eraser'
+        let isMouseDown = false;
+        let hasChangedThisStroke = false;
+        
+        // 畫布資料狀態：二維陣列 [row][col]
+        let gridState = Array(ROWS).fill(null).map(() => Array(COLS).fill('#FFFFFF'));
+
+        let history = [JSON.stringify(gridState)];
+        let historyIndex = 0;
+
+        // DOM 元素
+        const board = document.getElementById('color-board');
+        const presetContainer = document.getElementById('preset-colors-container');
+        const colorPreview = document.getElementById('color-preview');
+        
+        const toolPencil = document.getElementById('tool-pencil');
+        const toolEraser = document.getElementById('tool-eraser');
+        const btnUndo = document.getElementById('btn-undo');
+        const btnRedo = document.getElementById('btn-redo');
+        
+        const btnClear = document.getElementById('btn-clear');
+        const btnExport = document.getElementById('btn-export');
+
+        // 初始化預設顏色色盤
+        function initPresets() {
+            presetContainer.innerHTML = '';
+            presets.forEach(color => {
+                const btn = document.createElement('button');
+                btn.className = `w-8 h-8 rounded-full border border-stone-200 shadow-sm hover:scale-110 active:scale-90 transition-transform cursor-pointer relative ${color === currentColor ? 'ring-2 ring-amber-500 ring-offset-2' : ''}`;
+                btn.style.backgroundColor = color;
+                btn.title = color;
+                btn.addEventListener('click', () => selectColor(color));
+                presetContainer.appendChild(btn);
+            });
+        }
+
+        // 選擇顏色
+        function selectColor(color) {
+            currentColor = color;
+            colorPreview.style.backgroundColor = color;
+            
+            if (currentTool === 'eraser') {
+                switchTool('pencil');
+            }
+            
+            const buttons = presetContainer.querySelectorAll('button');
+            buttons.forEach(btn => {
+                const btnBg = rgbToHex(btn.style.backgroundColor);
+                if (btnBg.toLowerCase() === color.toLowerCase()) {
+                    btn.classList.add('ring-2', 'ring-amber-500', 'ring-offset-2');
+                } else {
+                    btn.classList.remove('ring-2', 'ring-amber-500', 'ring-offset-2');
+                }
+            });
+        }
+
+        // RGB 轉 HEX 工具函式
+        function rgbToHex(rgbStr) {
+            if (rgbStr.startsWith('#')) return rgbStr;
+            const vals = rgbStr.match(/\d+/g);
+            if (!vals) return '#ffffff';
+            const r = parseInt(vals[0]).toString(16).padStart(2, '0');
+            const g = parseInt(vals[1]).toString(16).padStart(2, '0');
+            const b = parseInt(vals[2]).toString(16).padStart(2, '0');
+            return `#${r}${g}${b}`;
+        }
+
+        // 切換工具模式
+        function switchTool(tool) {
+            currentTool = tool;
+            
+            [toolPencil, toolEraser].forEach(btn => {
+                btn.className = "flex flex-col items-center justify-center p-3 rounded-xl border border-stone-200 text-stone-600 hover:border-stone-300 hover:bg-stone-50 transition-all active:scale-95 group";
+            });
+
+            if (tool === 'pencil') {
+                toolPencil.className = "flex flex-col items-center justify-center p-3 rounded-xl border border-amber-600 bg-amber-50 text-amber-700 transition-all active:scale-95 group";
+            } else if (tool === 'eraser') {
+                toolEraser.className = "flex flex-col items-center justify-center p-3 rounded-xl border border-amber-600 bg-amber-50 text-amber-700 transition-all active:scale-95 group";
+            }
+        }
+
+        function saveHistoryState() {
+            history = history.slice(0, historyIndex + 1);
+            history.push(JSON.stringify(gridState));
+            historyIndex++;
+            updateHistoryButtons();
+        }
+
+        function updateHistoryButtons() {
+            btnUndo.disabled = (historyIndex === 0);
+            btnRedo.disabled = (historyIndex === history.length - 1);
+        }
+
+        function undo() {
+            if (historyIndex > 0) {
+                historyIndex--;
+                restoreStateFromHistory();
+            }
+        }
+
+        function redo() {
+            if (historyIndex < history.length - 1) {
+                historyIndex++;
+                restoreStateFromHistory();
+            }
+        }
+
+        function restoreStateFromHistory() {
+            gridState = JSON.parse(history[historyIndex]);
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = board.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                    if (cell) {
+                        cell.style.backgroundColor = gridState[r][c];
+                    }
+                }
+            }
+            updateHistoryButtons();
+        }
+
+        function commitStroke() {
+            if (hasChangedThisStroke) {
+                saveHistoryState();
+                hasChangedThisStroke = false;
+            }
+        }
+
+        function initBoard() {
+            board.innerHTML = '';
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell bg-white border border-stone-100 cursor-pointer shadow-sm hover:brightness-95';
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    cell.style.backgroundColor = gridState[r][c];
+
+                    cell.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        isMouseDown = true;
+                        handleCellInteraction(r, c);
+                    });
+
+                    cell.addEventListener('mouseenter', () => {
+                        if (isMouseDown) {
+                            handleCellInteraction(r, c);
+                        }
+                    });
+
+                    board.appendChild(cell);
+                }
+            }
+        }
+
+        document.addEventListener('mouseup', () => {
+            isMouseDown = false;
+            commitStroke();
+        });
+
+        // 手機觸控拖曳上色
+        board.addEventListener('touchstart', (e) => {
+            isMouseDown = true;
+            handleTouchDraw(e);
+        }, { passive: false });
+
+        board.addEventListener('touchmove', (e) => {
+            if (isMouseDown) {
+                e.preventDefault();
+                handleTouchDraw(e);
+            }
+        }, { passive: false });
+
+        board.addEventListener('touchend', () => {
+            isMouseDown = false;
+            commitStroke();
+        });
+
+        function handleTouchDraw(e) {
+            const touch = e.touches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (target && target.classList.contains('grid-cell')) {
+                const r = parseInt(target.dataset.row);
+                const c = parseInt(target.dataset.col);
+                if (!isNaN(r) && !isNaN(c)) {
+                    handleCellInteraction(r, c);
+                }
+            }
+        }
+
+        function handleCellInteraction(r, c) {
+            if (currentTool === 'pencil') {
+                paintCell(r, c, currentColor);
+            } else if (currentTool === 'eraser') {
+                paintCell(r, c, '#FFFFFF');
+            }
+        }
+
+        function paintCell(r, c, color) {
+            if (gridState[r][c] !== color) {
+                gridState[r][c] = color;
+                const cell = board.querySelector(`[data-row="${r}"][data-col="${c}"]`);
+                if (cell) {
+                    cell.style.backgroundColor = color;
+                }
+                hasChangedThisStroke = true;
+            }
+        }
+
+        // 一鍵清空畫布
+        function clearBoard() {
+            showDialog("確定要清空畫布重來嗎？", () => {
+                let changed = false;
+                for (let r = 0; r < ROWS; r++) {
+                    for (let c = 0; c < COLS; c++) {
+                        if (gridState[r][c] !== '#FFFFFF') {
+                            paintCell(r, c, '#FFFFFF');
+                            changed = true;
+                        }
+                    }
+                }
+                if (changed) {
+                    saveHistoryState();
+                }
+            });
+        }
+
+        // 客製確認彈出視窗
+        function showDialog(message, onConfirm) {
+            const overlay = document.createElement('div');
+            overlay.className = "fixed inset-0 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center z-[100] px-4";
+            overlay.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6 text-center transform scale-95 transition-transform duration-200">
+                    <div class="w-12 h-12 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-4 text-xl">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h4 class="text-base font-bold text-stone-800 mb-2">${message}</h4>
+                    <p class="text-xs text-stone-500 mb-5">此操作將會清空目前您在畫布上的進度。</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="dialog-cancel" class="py-2.5 px-4 bg-stone-100 hover:bg-stone-200 text-stone-600 font-semibold rounded-xl text-sm transition-colors">取消</button>
+                        <button id="dialog-confirm" class="py-2.5 px-4 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl text-sm transition-colors shadow-lg shadow-rose-100">確認清空</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+
+            document.getElementById('dialog-cancel').onclick = () => overlay.remove();
+            document.getElementById('dialog-confirm').onclick = () => {
+                onConfirm();
+                overlay.remove();
+            };
+        }
+
+        // 匯出高解析度 PNG 檔案
+        function exportImage() {
+            const CELL_SIZE = 120;
+            const canvas = document.createElement('canvas');
+            canvas.width = COLS * CELL_SIZE;
+            canvas.height = ROWS * CELL_SIZE;
+            const ctx = canvas.getContext('2d');
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    ctx.fillStyle = gridState[r][c];
+                    ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    ctx.strokeStyle = '#e2e8f0';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                }
+            }
+
+            const watermarkText = "© SICA UNIVERSE 西卡宇宙";
+            ctx.font = "bold 24px 'Inter', 'Noto Sans TC', sans-serif";
+            const textMetrics = ctx.measureText(watermarkText);
+            const textWidth = textMetrics.width;
+            
+            const pillHeight = 56;
+            const pillWidth = textWidth + 40;
+            const pillX = canvas.width - pillWidth - 30;
+            const pillY = canvas.height - pillHeight - 30;
+
+            ctx.fillStyle = "rgba(28, 25, 23, 0.7)";
+            ctx.beginPath();
+            ctx.roundRect(pillX, pillY, pillWidth, pillHeight, 28);
+            ctx.fill();
+
+            ctx.fillStyle = "#FFFFFF";
+            ctx.textBaseline = "middle";
+            ctx.textAlign = "center";
+            ctx.fillText(watermarkText, pillX + (pillWidth / 2), pillY + (pillHeight / 2));
+
+            try {
+                const imgData = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `SICA_UNIVERSE_Coloring_${Date.now()}.png`;
+                link.href = imgData;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast("圖片已成功匯出，快去私訊西卡宇宙官方LINE，預定專屬泡泡杯墊吧！ ✨");
+            } catch (err) {
+                console.error("Export failed: ", err);
+                showToast("匯出失敗，請重試 😢");
+            }
+        }
+
+        // 客製提示 Toast 條
+        function showToast(msg) {
+            const toast = document.createElement('div');
+            toast.className = "fixed bottom-8 left-1/2 -translate-x-1/2 bg-stone-900 text-white font-medium text-xs sm:text-sm px-6 py-3 rounded-full shadow-xl flex items-center gap-2 z-[200] animate-bounce";
+            toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i> ${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // 懸浮公告欄縮小與展開控制
+        function toggleAnnouncement() {
+            const full = document.getElementById('floating-announcement');
+            const mini = document.getElementById('floating-announcement-minimized');
+            full.classList.toggle('hidden');
+            mini.classList.toggle('hidden');
+        }
+
+        // 綁定所有點擊事件
+        toolPencil.addEventListener('click', () => switchTool('pencil'));
+        toolEraser.addEventListener('click', () => switchTool('eraser'));
+        btnUndo.addEventListener('click', undo);
+        btnRedo.addEventListener('click', redo);
+        
+        btnClear.addEventListener('click', clearBoard);
+        btnExport.addEventListener('click', exportImage);
+
+        // 網頁載入時啟動
+        window.onload = function() {
+            initPresets();
+            initBoard();
+            switchTool('pencil');
+            updateHistoryButtons();
+        };
+    </script>
+</body>
+</html>
