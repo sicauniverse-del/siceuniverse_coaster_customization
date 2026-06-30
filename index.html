@@ -45,7 +45,7 @@
             <!-- 左側側邊欄：工具與色彩選擇 -->
             <aside class="w-full lg:w-80 flex flex-col gap-6 shrink-0">
                 <!-- 工具卡片 -->
-                <div class="hidden lg:flex bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex-col gap-4">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-stone-100 flex flex-col gap-4">
                     <h3 class="text-sm font-semibold text-stone-400 uppercase tracking-wider">工具模式</h3>
                     <div class="grid grid-cols-2 gap-2">
                         <button id="tool-pencil" class="flex flex-col items-center justify-center p-3 rounded-xl border border-amber-600 bg-amber-50 text-amber-700 transition-all active:scale-95 group">
@@ -87,38 +87,31 @@
                         <div id="color-preview" class="w-6 h-6 rounded-full border border-stone-200 shadow-sm" style="background-color: #8c2433;"></div>
                     </div>
                 </div>
-               
+                <!-- 行動版浮動工具列（只在手機顯示） -->
+                <div class="lg:hidden fixed left-2 top-1/2 -translate-y-1/2 z-50 flex flex-col gap-2 bg-white/90 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-stone-100">
+    
+                <button id="tool-pencil-mobile" class="p-3 rounded-xl border border-amber-600 bg-amber-50 text-amber-700">
+                    <i class="fa-solid fa-paintbrush"></i>
+                </button>
+
+                <button id="tool-eraser-mobile" class="p-3 rounded-xl border border-stone-200 text-stone-600">
+                    <i class="fa-solid fa-eraser"></i>
+                </button>
+
+                <button id="btn-undo-mobile" class="p-3 rounded-xl border border-stone-200 text-stone-600">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+
+                <button id="btn-redo-mobile" class="p-3 rounded-xl border border-stone-200 text-stone-600">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+
+                </div>
             </aside>
 
             <!-- 中間畫布區 -->
             <section class="flex-grow flex flex-col justify-center items-center relative">
-                
                 <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-md border border-stone-100 flex flex-col items-center gap-6 w-full max-w-[640px] relative">
-                    <!-- 手機版浮動工具列 -->
-                <div
-                    class="lg:hidden absolute top-1/2 -translate-y-1/2 -left-16 flex flex-col gap-2 z-20"
-
-                    <button id="tool-pencil-mobile"
-                     class="w-12 h-12 rounded-xl bg-white shadow-lg border border-stone-200 text-amber-700">
-                    <i class="fa-solid fa-paintbrush"></i>
-                    </button>
-
-                    <button id="tool-eraser-mobile"
-                       class="w-12 h-12 rounded-xl bg-white shadow-lg border border-stone-200">
-                    <i class="fa-solid fa-eraser"></i>
-                    </button>
-
-                    <button id="btn-undo-mobile"
-                    class="w-12 h-12 rounded-xl bg-white shadow-lg border border-stone-200">
-                    <i class="fa-solid fa-rotate-left"></i>
-                    </button>
-
-                    <button id="btn-redo-mobile"
-                     class="w-12 h-12 rounded-xl bg-white shadow-lg border border-stone-200">
-                    <i class="fa-solid fa-rotate-right"></i>
-                    </button>
-
-                    </div>
                     <!-- 畫布資訊標籤 -->
                     <div class="flex justify-between w-full items-center">
                         <div class="flex items-center gap-2 text-stone-500 text-xs font-semibold">
@@ -309,30 +302,6 @@
                 toolEraser.className = "flex flex-col items-center justify-center p-3 rounded-xl border border-amber-600 bg-amber-50 text-amber-700 transition-all active:scale-95 group";
             }
         }
-        const mobilePencil = document.getElementById("tool-pencil-mobile");
-        const mobileEraser = document.getElementById("tool-eraser-mobile");
-
-        if (mobilePencil && mobileEraser) {
-
-         mobilePencil.className =
-               "w-12 h-12 rounded-xl bg-white shadow-lg border border-stone-200";
-
-            mobileEraser.className =
-               "w-12 h-12 rounded-xl bg-white shadow-lg border border-stone-200";
-
-            if (tool === "pencil") {
-
-              mobilePencil.className =
-                  "w-12 h-12 rounded-xl bg-amber-50 shadow-lg border border-amber-600 text-amber-700";
-
-            } else {
-
-              mobileEraser.className =
-                 "w-12 h-12 rounded-xl bg-amber-50 shadow-lg border border-amber-600 text-amber-700";
-
-            }
-
-        }
 
         function saveHistoryState() {
             history = history.slice(0, historyIndex + 1);
@@ -344,14 +313,6 @@
         function updateHistoryButtons() {
             btnUndo.disabled = (historyIndex === 0);
             btnRedo.disabled = (historyIndex === history.length - 1);
-            const btnUndoMobile = document.getElementById("btn-undo-mobile");
-            const btnRedoMobile = document.getElementById("btn-redo-mobile");
-
-            if (btnUndoMobile)
-              btnUndoMobile.disabled = btnUndo.disabled;
-
-            if (btnRedoMobile)
-              btnRedoMobile.disabled = btnRedo.disabled;
         }
 
         function undo() {
